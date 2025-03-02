@@ -12,6 +12,5 @@ ASTNode* create_ast_node(ASTNodeType type, const char* value, ASTNode* left, AST
 
 void free_ast(ASTNode* node) {
     if (!node) return;
-    
     free(node);
 }

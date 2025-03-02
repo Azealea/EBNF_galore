@@ -1,22 +1,42 @@
 #pragma once
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <ctype.h>
 #include <string.h>
 
+#define SIZE_INPUT_BUFF 100000
+
 typedef enum {
-    T_IDENTIFIER, T_LITERAL, T_EQUAL, T_SEMICOLON, T_PIPE,
-    T_LPAREN, T_RPAREN, T_LBRACKET, T_RBRACKET, T_LBRACE, T_RBRACE,
-    T_EOF, T_ERROR
+    TKN_IDENTIFIER,
+    TKN_LITERAL,
+    TKN_EQUAL,
+    TKN_SEMICOLON,
+    TKN_PIPE,
+    TKN_LPAREN,
+    TKN_RPAREN,
+    TKN_LBRACKET,
+    TKN_RBRACKET,
+    TKN_LBRACE,
+    TKN_RBRACE,
+    TKN_EOF,
+    TKN_ERROR
 } Token;
 
 typedef struct {
-    const char* input;
     size_t pos;
+    char input[SIZE_INPUT_BUFF];
     Token current_token;
-    char lexeme[256]; 
+    char lexeme[256];
+    FILE* file;
 } Lexer;
 
 Token lexer_peek(Lexer* lexer);
 Token lexer_pop(Lexer* lexer);
+
+void lexer_init(Lexer* lexer, const char* path);
+void lexer_advance(Lexer* lexer);
+Token lexer_next_token(Lexer* lexer);
+void lexer_skip_whitespace(Lexer* lexer);
+Token lexer_identifier(Lexer* lexer);
+Token lexer_literal(Lexer* lexer);

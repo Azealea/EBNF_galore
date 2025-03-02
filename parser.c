@@ -1,61 +1,96 @@
-#pragma once
-
 #include "parser.h"
 
-void parser_init(Parser* p, Lexer* lexer) {
-    p->lexer = lexer;
-    p->status = 0;
-    p->root = parser_syntax(p);
+#define PEEK lexer_peek(parser->lexer)
+#define POP lexer_pop(parser->lexer)
+#define GET_IDENTIFIER strdup(parser->lexer->lexeme)
+#define PARSER_LOG(rule) printf("%s\n", rule)
+
+void parser_init(Parser* parser, Lexer* lexer) {
+    parser->lexer = lexer;
+    parser->status = 0;
+    parser->vebose = VERBOSITY_ALL;
 }
 
-ASTNode* parser_syntax(Parser* p) {
-    ASTNode* root = parser_rule(p);
-    while (lexer_peek(p->lexer) == T_IDENTIFIER) {
-        root = create_ast_node(AST_RULE, NULL, root, parser_rule(p));
+ASTNode* parse(const char* path) {
+    Lexer lexer;
+    lexer_init(&lexer, path);
+    Parser parser;
+    parser_init(&parser, &lexer);
+    return parser_syntax(&parser);
+}
+
+/*
+** syntax = { rule } ;
+*/
+ASTNode* parser_syntax(Parser* parser) {
+    PARSER_LOG("syntax");
+    ASTNode* root = Parser_rule();
+    while (PEEK == TKN_IDENTIFIER) {
+        root = create_ast_node(AST_RULE, NULL, root, Parser_rule());
     }
     return root;
 }
 
-ASTNode* parser_rule(Parser* p) {
-    if (lexer_peek(p->lexer) != T_IDENTIFIER) parser_err(p);
-    char* id = strdup(p->lexer->lexeme);
-    lexer_pop(p->lexer);
+/*
+** rule = identifier "=" expression ";" ;
+*/
+ASTNode* parser_rule(Parser* parser) {
+    PARSER_LOG("rule");
+    if (PEEK != TKN_IDENTIFIER) parser_err(parser);
+    char* id = GET_IDENTIFIER;
+    POP;
 
-    if (lexer_pop(p->lexer) != T_EQUAL) parser_err(p);
-    
-    ASTNode* expr = parser_expression(p);
-    if (lexer_pop(p->lexer) != T_SEMICOLON) parser_err(p);
+    if (POP != TKN_EQUAL) parser_err(parser);
+
+    ASTNode* expr = Parser_expression();
+    if (POP != TKN_SEMICOLON) parser_err(parser);
 
     return create_ast_node(AST_RULE, id, expr, NULL);
 }
 
-ASTNode* parser_expression(Parser* p) {
-    ASTNode* left = parser_term(p);
-    while (lexer_peek(p->lexer) == T_PIPE) {
-        lexer_pop(p->lexer);
-        left = create_ast_node(AST_EXPRESSION, "|", left, parser_term(p));
+/*
+** expression = term { "|" term } ;
+*/
+ASTNode* parser_expression(Parser* parser) {
+    PARSER_LOG("expression");
+    ASTNode* left = Parser_term();
+    while (PEEK == TKN_PIPE) {
+        POP;
+        left = create_ast_node(AST_EXPRESSION, "|", left, Parser_term());
     }
     return left;
 }
 
-ASTNode* parser_term(Parser* p) {
-    ASTNode* left = parser_factor(p);
-    while (lexer_peek(p->lexer) == T_IDENTIFIER || lexer_peek(p->lexer) == T_LITERAL) {
-        left = create_ast_node(AST_TERM, NULL, left, parser_factor(p));
+/*
+** term = factor { factor } ;
+*/
+ASTNode* parser_term(Parser* parser) {
+    PARSER_LOG("term");
+    ASTNode* left = Parser_factor();
+    while (PEEK == TKN_IDENTIFIER || PEEK == TKN_LITERAL) {
+        left = create_ast_node(AST_TERM, NULL, left, Parser_factor());
     }
     return left;
 }
 
-ASTNode* parser_factor(Parser* p) {
-    if (lexer_peek(p->lexer) == T_IDENTIFIER || lexer_peek(p->lexer) == T_LITERAL) {
-        return create_ast_node(AST_FACTOR, strdup(p->lexer->lexeme), NULL, NULL);
+/*
+** factor = identifier
+**        | literal
+**        | "(" expression ")"
+**        | "[" expression "]"
+**        | "{" repetition "}" ;
+*/
+ASTNode* parser_factor(Parser* parser) {
+    PARSER_LOG("factor");
+    if (PEEK == TKN_IDENTIFIER || PEEK == TKN_LITERAL) {
+        return create_ast_node(AST_FACTOR, GET_IDENTIFIER, NULL, NULL);
     }
-    parser_err(p);
+    parser_err(parser);
     return NULL;
 }
 
-void parser_err(Parser* p) {
-    p->status = 1;
+void parser_err(Parser* parser) {
+    parser->status = 1;
     fprintf(stderr, "Parsing error!\n");
     exit(EXIT_FAILURE);
 }
