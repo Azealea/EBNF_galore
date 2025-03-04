@@ -1,6 +1,6 @@
-#include "ast.h"
-#include "parser.h"
-#include "maker.h"
+#include "ast/ast.h"
+#include "parser/parser.h"
+#include "maker/maker.h"
 #include <stdio.h>
 
 int main(int argc, char** argv) {

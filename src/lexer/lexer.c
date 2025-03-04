@@ -1,7 +1,4 @@
 #include "lexer.h"
-#include "log.h"
-#include "token.h"
-#include <stdio.h>
 
 static void lexer_read_file(Lexer* lexer) {
     LOG_TRACE("read_file");

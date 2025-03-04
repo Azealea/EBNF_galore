@@ -10,6 +10,7 @@ static void ast_print(ASTNode* node, int rec_level)
         case AST_IDENTIFIER:
             printf("%%%s%%", node->data.value);
             break;
+
         case AST_LITERAL:
             printf("\"%s\"", node->data.value);
             break;
@@ -32,6 +33,12 @@ static void ast_print(ASTNode* node, int rec_level)
             printf(" }");
             break;
 
+        case AST_CONCAT: {
+            for (int i = 0; node->data.nodes[i] != NULL; i++) {
+                ast_print(node->data.nodes[i], 1);
+            }
+            break;
+        }
         case AST_FACTORS: {
             for (int i = 0; node->data.nodes[i] != NULL; i++) {
                 if (i > 0) printf(" ");

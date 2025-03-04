@@ -1,11 +1,4 @@
-#include "ast.h"
 #include "parser.h"
-#include "lexer.h"
-
-#include <stdbool.h>
-#include "array_builder.h"
-#include "log.h"
-#include "token.h"
 
 #define PARSER_ERR parser_err(parser)
 #define PEEK lexer_peek(parser->lexer)

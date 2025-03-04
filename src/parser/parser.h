@@ -2,8 +2,15 @@
 
 #include <stdio.h>
 
-#include "ast.h"
-#include "lexer.h"
+#define _GNU_SOURCE
+#include <string.h>
+#include "ast/ast.h"
+#include "lexer/lexer.h"
+
+#include <stdbool.h>
+#include "utils/array_builder.h"
+#include "utils/log.h"
+#include "lexer/token.h"
 
 
 typedef struct {

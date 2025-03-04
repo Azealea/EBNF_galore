@@ -1,6 +1,4 @@
 #include "maker.h"
-#include "ast.h"
-#include <stdio.h>
 
 typedef void (*GenFunc)(Grammar *grammar, ASTNode *node);
 

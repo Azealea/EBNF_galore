@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "log.h"
+#include "utils/log.h"
 #include "token.h"
 
 #define SIZE_INPUT_BUFF 100000

@@ -1,5 +1,6 @@
 #pragma once
 
-#include "ast.h"
+#include "ast/ast.h"
+#include <stdio.h>
 
 void generate_script(Grammar *grammar, ASTNode *node);
