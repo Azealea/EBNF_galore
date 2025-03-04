@@ -1,4 +1,5 @@
-maker of random script with EBNF based structure
+# EBNF_Galore
+### Maker of random script with EBNF based structure
 
 I have added some specific things to help writing the base structure, but it
 does those EBNF operation :
@@ -21,8 +22,7 @@ The rules that will taken as root must be preceded by a explamation mark :
  "!foo = "bar" ;"
 
 
-To help random not exploding when confronted with choices,
-before the choice an number can be inserted to specify the weight,
+To help random not exploding when confronted with choices, an number can be inserted before a choice to specify the weight,
 if not specified it will be defaulted to 1 :
 
  " 2 expr_A | expr_B "
@@ -30,9 +30,8 @@ if not specified it will be defaulted to 1 :
  ( 2 third chance of taking expr_A, 1 third chance of taking expr_B)
 
 
-
-TODO
-Comments as (* this is a comment \*\)
-Limit number of repetition
+### TODO
+- Comments as (* this is a comment \*\)
+- Limit number of repetition
 
 
