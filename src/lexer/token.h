@@ -1,12 +1,15 @@
 #pragma once
 
 typedef enum {
+    TKN_ERROR,
     TKN_IDENTIFIER,
     TKN_LITERAL,
     TKN_EQUAL,
     TKN_SEMICOLON,
     TKN_PIPE,
     TKN_PLUS,
+    TKN_WEIGHT,
+    TKN_EXCLEMATION,
     TKN_LPAREN,
     TKN_RPAREN,
     TKN_LBRACKET,
@@ -14,5 +17,4 @@ typedef enum {
     TKN_LBRACE,
     TKN_RBRACE,
     TKN_EOF,
-    TKN_ERROR
 } Token;

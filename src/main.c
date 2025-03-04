@@ -14,9 +14,8 @@ int main(int argc, char** argv) {
     grammar_print(grammar);
     printf("PRINTING FINISHED\n");
     srand((unsigned)time(NULL));
-    if (grammar->rules)
-        generate_script(grammar, grammar->rules[0]->node);
-    printf("FINISHED\n");
+    generate(grammar);
+    printf("\nFINISHED\n");
     return 0;
 }
 

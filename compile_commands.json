@@ -1,0 +1,18 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-Wall",
+      "-Wextra",
+      "-std=gnu23",
+      "-I./src",
+      "-c",
+      "-o",
+      "src/maker/maker.o",
+      "src/maker/maker.c"
+    ],
+    "directory": "/home/pedro/EBNF_galore",
+    "file": "/home/pedro/EBNF_galore/src/maker/maker.c",
+    "output": "/home/pedro/EBNF_galore/src/maker/maker.o"
+  }
+]

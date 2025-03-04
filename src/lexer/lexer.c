@@ -1,4 +1,7 @@
 #include "lexer.h"
+#include "token.h"
+#include "utils/log.h"
+#include <ctype.h>
 
 static void lexer_read_file(Lexer* lexer) {
     LOG_TRACE("read_file");
@@ -15,6 +18,17 @@ static void lexer_skip_whitespace(Lexer* lexer) {
     while (isspace(lexer->input[lexer->pos])) {
         lexer_advance(lexer);
     }
+}
+
+static Token lexer_weight(Lexer *lexer)
+{
+    LOG_TRACE("weigth");
+    size_t start = lexer->pos;
+    while (isdigit(lexer->input[lexer->pos]))
+        lexer_advance(lexer);
+    strncpy(lexer->lexeme, lexer->input + start, lexer->pos - start);
+    lexer->lexeme[lexer->pos - start] = '\0';
+    return TKN_WEIGHT;
 }
 
 static Token lexer_identifier(Lexer* lexer) {
@@ -47,43 +61,30 @@ static Token lexer_next_token(Lexer* lexer) {
     char c = lexer->input[lexer->pos];
 
     if (c == '\0') return TKN_EOF;
+    if (isdigit(c)) return lexer_weight(lexer);
     if (isalpha(c)) return lexer_identifier(lexer);
     if (c == '"' || c == '\'') return lexer_literal(lexer);
 
-    switch (c) {
-        case '=':
-            lexer_advance(lexer);
-            return TKN_EQUAL;
-        case ';':
-            lexer_advance(lexer);
-            return TKN_SEMICOLON;
-        case '|':
-            lexer_advance(lexer);
-            return TKN_PIPE;
-        case '+':
-            lexer_advance(lexer);
-            return TKN_PLUS;
-        case '(':
-            lexer_advance(lexer);
-            return TKN_LPAREN;
-        case ')':
-            lexer_advance(lexer);
-            return TKN_RPAREN;
-        case '[':
-            lexer_advance(lexer);
-            return TKN_LBRACKET;
-        case ']':
-            lexer_advance(lexer);
-            return TKN_RBRACKET;
-        case '{':
-            lexer_advance(lexer);
-            return TKN_LBRACE;
-        case '}':
-            lexer_advance(lexer);
-            return TKN_RBRACE;
-        default:
-            return TKN_ERROR;
-    }
+    static Token char_to_token[256]  = {
+        ['='] = TKN_EQUAL,
+        [';'] = TKN_SEMICOLON,
+        ['|'] = TKN_PIPE,
+        ['+'] = TKN_PLUS,
+        ['!'] = TKN_EXCLEMATION,
+        ['('] = TKN_LPAREN,
+        [')'] = TKN_RPAREN,
+        ['['] = TKN_LBRACKET,
+        [']'] = TKN_RBRACKET,
+        ['{'] = TKN_LBRACE,
+        ['}'] = TKN_RBRACE,
+    };
+
+    Token new_token = char_to_token[(int) c];
+    if (new_token == TKN_ERROR)
+        return TKN_ERROR;
+
+    lexer_advance(lexer);
+    return new_token;
 }
 
 
@@ -103,8 +104,10 @@ static void lexer_print_current_token(Lexer *lexer)
         [TKN_EOF] = "EOF",
         [TKN_LITERAL] = "[literal]",
         [TKN_IDENTIFIER] = "[identifier]",
+        [TKN_WEIGHT] = "[weigth]",
         [TKN_PIPE] = "|",
         [TKN_PLUS] = "+",
+        [TKN_EXCLEMATION] = "!",
         [TKN_SEMICOLON] = ";",
         [TKN_EQUAL] = "=",
         [TKN_RPAREN] = ")",
@@ -114,14 +117,18 @@ static void lexer_print_current_token(Lexer *lexer)
         [TKN_RBRACE] = "}",
         [TKN_LBRACE] = "{",
     };
-    printf("POP token : %s", token_to_string[lexer->current_token]);
+    printf("\ttoken : %s", token_to_string[lexer->current_token]);
     if (lexer->current_token == TKN_IDENTIFIER)
     {
-        printf(": %s", lexer->lexeme);
+        printf(": %%%s%%", lexer->lexeme);
     }
     else if (lexer->current_token == TKN_LITERAL)
     {
         printf(": \"%s\"", lexer->lexeme);
+    }
+    else if (lexer->current_token == TKN_WEIGHT)
+    {
+        printf(": %s", lexer->lexeme);
     }
     printf("\n");
 }

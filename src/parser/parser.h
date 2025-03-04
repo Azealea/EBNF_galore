@@ -39,7 +39,7 @@ void parser_err(Parser* p);
 /*
 ** syntax = { rule } ;
 **
-** rule = identifier "=" expression ";" ;
+** rule = [ '#' ] identifier "=" expression ";" ;
 **
 ** expression = term { "|" term } ;
 **

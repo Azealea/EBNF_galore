@@ -13,7 +13,7 @@ typedef enum {
     TRACE
 } LOG_LEVEL;
 
-static LOG_LEVEL CURRENT_LOG_LEVEL = INFO;
+[[ maybe_unused ]] static LOG_LEVEL CURRENT_LOG_LEVEL = INFO;
 
 #define SET_LOG_LEVEL(level) (CURRENT_LOG_LEVEL = level)
 

@@ -1,8 +1,11 @@
 #include "maker.h"
+#include <stddef.h>
+#include <stdlib.h>
 
 typedef void (*GenFunc)(Grammar *grammar, ASTNode *node);
+void generate_script(Grammar *grammar, ASTNode *node);
 
-void gen_literal(Grammar *grammar, ASTNode *node) {
+void gen_literal([[maybe_unused]] Grammar *grammar, ASTNode *node) {
     if (!node->data.value)
         return;
 
@@ -50,12 +53,23 @@ void gen_choice(Grammar *grammar, ASTNode *node) {
     if (!node->data.nodes)
         return;
     int count = 0;
-    while (node->data.nodes[count] != NULL)
-        count++;
-    if (count > 0) {
-        int choice = rand() % count;
-        generate_script(grammar, node->data.nodes[choice]);
+    for (size_t i = 0 ; node->data.nodes[i]; i++)
+    {
+        count+= node->data.nodes[i]->data.factors.weigth;
     }
+    if (!count)
+        return;
+    int choice = rand() % count;
+    for (size_t i = 0; node->data.nodes[i]; i++)
+    {
+        if (choice < node->data.nodes[i]->data.factors.weigth)
+        {
+            generate_script(grammar, node->data.nodes[i]);
+            return;
+        }
+        choice -= node->data.nodes[i]->data.factors.weigth;
+    }
+
 }
 
 void gen_factors(Grammar *grammar, ASTNode *node) {
@@ -94,3 +108,14 @@ void generate_script(Grammar *grammar, ASTNode *node) {
     }
 }
 
+
+void generate(Grammar *grammar) {
+    for (GrammarRule** rule = grammar->rules; *rule ; rule++)
+    {
+        if ((*rule)->is_root)
+        {
+            generate_script(grammar, (*rule)->node);
+            printf("\n");
+        }
+    }
+}

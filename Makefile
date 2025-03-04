@@ -1,5 +1,5 @@
 CC      = gcc
-CFLAGS  = -Wall -Wextra -std=gnu99 -I./src
+CFLAGS  = -Wall -Wextra -std=gnu23 -I./src
 LDFLAGS =
 TARGET  = ebnf_maker
 

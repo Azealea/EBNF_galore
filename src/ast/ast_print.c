@@ -40,6 +40,7 @@ static void ast_print(ASTNode* node, int rec_level)
             break;
         }
         case AST_FACTORS: {
+            printf("WEIGHT: %i > ", node->data.factors.weigth);
             for (int i = 0; node->data.nodes[i] != NULL; i++) {
                 if (i > 0) printf(" ");
                 ast_print(node->data.nodes[i], 1);
@@ -69,6 +70,8 @@ static void ast_print(ASTNode* node, int rec_level)
 
 static void grammar_rule_print(GrammarRule *rule)
 {
+    if (rule->is_root)
+        printf("#");
     printf("%s =\n", rule->identifier);
     ast_print(rule->node, 0);
 }

@@ -1,10 +1,19 @@
 #include "ast.h"
+#include <stdbool.h>
 #include <stdlib.h>
 
 static inline ASTNode* ASTNode_ctor(ASTNodeType type)
 {
     ASTNode* node = (ASTNode*)malloc(sizeof(ASTNode));
     node->type = type;
+    return node;
+}
+
+ASTNode* ASTNode_ctor_factors(ASTNodeType type, ASTNode** nodes, int weigth)
+{
+    ASTNode *node = ASTNode_ctor(type);
+    node->data.factors.choices = nodes;
+    node->data.factors.weigth = weigth;
     return node;
 }
 
@@ -29,11 +38,12 @@ ASTNode* ASTNode_ctor_node(ASTNodeType type, ASTNode *child)
     return node;
 }
 
-GrammarRule *GrammarRule_ctor(char *identifier, ASTNode* node)
+GrammarRule *GrammarRule_ctor(char *identifier, ASTNode* node, bool is_root)
 {
     GrammarRule *rule = malloc(sizeof(GrammarRule));
     rule->identifier = identifier;
     rule->node = node;
+    rule->is_root = is_root;
     return rule;
 }
 

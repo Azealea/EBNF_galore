@@ -1,4 +1,9 @@
 #include "parser.h"
+#include "ast/ast.h"
+#include "lexer/token.h"
+#include "utils/log.h"
+#include <stdbool.h>
+#include <stdlib.h>
 
 #define PARSER_ERR parser_err(parser)
 #define PEEK lexer_peek(parser->lexer)
@@ -35,17 +40,19 @@ Grammar* parse(const char* path) {
 Grammar* parser_syntax(Parser* parser) {
     LOG_TRACE("syntax");
     ARRAY_BUILDER(rules, GrammarRule*);
-    while (PEEK == TKN_IDENTIFIER) {
+    while (PEEK == TKN_IDENTIFIER || PEEK == TKN_EXCLEMATION) {
         ARRAY_BUILDER_PUSH(rules, Parser_rule());
     }
     return Grammar_ctor(ARRAY_BUILDER_FINALIZE(rules));
 }
 
 /*
-** rule = identifier "=" expression ";" ;
+** rule = [ '#' ]  identifier "=" expression ";" ;
 */
 GrammarRule* parser_rule(Parser* parser) {
     LOG_TRACE("rule");
+
+    bool is_root = EAT(TKN_EXCLEMATION);
     if ( PEEK !=TKN_IDENTIFIER) PARSER_ERR;
     char* id = LEXER_GET_STRING;
     POP;
@@ -55,7 +62,7 @@ GrammarRule* parser_rule(Parser* parser) {
     ASTNode* expr = Parser_expression();
     if (!EAT(TKN_SEMICOLON)) PARSER_ERR;
 
-    return GrammarRule_ctor(id, expr );
+    return GrammarRule_ctor(id, expr, is_root);
 }
 
 /*
@@ -72,17 +79,23 @@ ASTNode* parser_expression(Parser* parser) {
 }
 
 /*
-** term = concat { concat } ;
+** term = ? [0-9]* ? concat { concat } ;
 */
 ASTNode* parser_term(Parser* parser) {
     // term is a group of factor
     LOG_TRACE("term");
+    int weight = 1;
+    if (PEEK == TKN_WEIGHT)
+    {
+        weight = atoi(parser->lexer->lexeme);
+        POP;
+    }
     ARRAY_BUILDER(concats, ASTNode*);
     ARRAY_BUILDER_PUSH(concats, Parser_concat());
     while (PEEK == TKN_IDENTIFIER || PEEK == TKN_LITERAL || PEEK == TKN_LBRACE || PEEK == TKN_LBRACKET || PEEK == TKN_LPAREN) {
         ARRAY_BUILDER_PUSH(concats, Parser_concat());
     }
-    return ASTNode_ctor_nodes(AST_FACTORS, ARRAY_BUILDER_FINALIZE(concats));
+    return ASTNode_ctor_factors(AST_FACTORS, ARRAY_BUILDER_FINALIZE(concats), weight);
 }
 
 /*
