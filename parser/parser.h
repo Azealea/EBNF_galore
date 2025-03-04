@@ -17,12 +17,14 @@ Grammar* parser_syntax(Parser* p);
 GrammarRule* parser_rule(Parser* p);
 ASTNode* parser_expression(Parser* p);
 ASTNode* parser_term(Parser* p);
+ASTNode* parser_concat(Parser* p);
 ASTNode* parser_factor(Parser* p);
 
 #define Parser_syntax() parser_syntax(parser)
 #define Parser_rule() parser_rule(parser)
 #define Parser_expression() parser_expression(parser)
 #define Parser_term() parser_term(parser)
+#define Parser_concat() parser_concat(parser)
 #define Parser_factor() parser_factor(parser)
 
 void parser_err(Parser* p);
@@ -35,6 +37,8 @@ void parser_err(Parser* p);
 ** expression = term { "|" term } ;
 **
 ** term = factor { factor } ;
+**
+** concat = factor { "+" factor }
 **
 ** factor = identifier
 **        | literal

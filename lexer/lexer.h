@@ -5,24 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 #include "log.h"
+#include "token.h"
 
 #define SIZE_INPUT_BUFF 100000
 
-typedef enum {
-    TKN_IDENTIFIER,
-    TKN_LITERAL,
-    TKN_EQUAL,
-    TKN_SEMICOLON,
-    TKN_PIPE,
-    TKN_LPAREN,
-    TKN_RPAREN,
-    TKN_LBRACKET,
-    TKN_RBRACKET,
-    TKN_LBRACE,
-    TKN_RBRACE,
-    TKN_EOF,
-    TKN_ERROR
-} Token;
 
 typedef struct {
     size_t pos;

@@ -7,6 +7,7 @@
 typedef enum {
     AST_CHOICE,
     AST_FACTORS,
+    AST_CONCAT,
     AST_GROUP,
     AST_OPTIONAL,
     AST_REPETITION,

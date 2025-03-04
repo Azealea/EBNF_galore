@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include "array_builder.h"
 #include "log.h"
+#include "token.h"
 
 #define PARSER_ERR parser_err(parser)
 #define PEEK lexer_peek(parser->lexer)
@@ -39,7 +40,7 @@ Grammar* parse(const char* path) {
 ** syntax = { rule } ;
 */
 Grammar* parser_syntax(Parser* parser) {
-    LOG_INFO("syntax");
+    LOG_TRACE("syntax");
     ARRAY_BUILDER(rules, GrammarRule*);
     while (PEEK == TKN_IDENTIFIER) {
         ARRAY_BUILDER_PUSH(rules, Parser_rule());
@@ -51,9 +52,10 @@ Grammar* parser_syntax(Parser* parser) {
 ** rule = identifier "=" expression ";" ;
 */
 GrammarRule* parser_rule(Parser* parser) {
-    LOG_INFO("rule");
-    if (!EAT(TKN_IDENTIFIER)) PARSER_ERR;
+    LOG_TRACE("rule");
+    if ( PEEK !=TKN_IDENTIFIER) PARSER_ERR;
     char* id = LEXER_GET_STRING;
+    POP;
 
     if (!EAT(TKN_EQUAL)) PARSER_ERR;
 
@@ -67,7 +69,7 @@ GrammarRule* parser_rule(Parser* parser) {
 ** expression = term { "|" term } ;
 */
 ASTNode* parser_expression(Parser* parser) {
-    LOG_INFO("expression");
+    LOG_TRACE("expression");
     ARRAY_BUILDER(terms, ASTNode*);
     ARRAY_BUILDER_PUSH(terms, Parser_term());
     while (EAT(TKN_PIPE)) {
@@ -77,17 +79,31 @@ ASTNode* parser_expression(Parser* parser) {
 }
 
 /*
-** term = factor { factor } ;
+** term = concat { concat } ;
 */
 ASTNode* parser_term(Parser* parser) {
     // term is a group of factor
-    LOG_INFO("term");
+    LOG_TRACE("term");
+    ARRAY_BUILDER(concats, ASTNode*);
+    ARRAY_BUILDER_PUSH(concats, Parser_concat());
+    while (PEEK == TKN_IDENTIFIER || PEEK == TKN_LITERAL || PEEK == TKN_LBRACE || PEEK == TKN_LBRACKET || PEEK == TKN_LPAREN) {
+        ARRAY_BUILDER_PUSH(concats, Parser_concat());
+    }
+    return ASTNode_ctor_nodes(AST_FACTORS, ARRAY_BUILDER_FINALIZE(concats));
+}
+
+/*
+** concat = factor { "+" factor } ;
+*/
+ASTNode* parser_concat(Parser* parser)
+{
+    LOG_TRACE("expression");
     ARRAY_BUILDER(factors, ASTNode*);
     ARRAY_BUILDER_PUSH(factors, Parser_factor());
-    while (PEEK == TKN_IDENTIFIER || PEEK == TKN_LITERAL || PEEK == TKN_LBRACE || PEEK == TKN_LBRACKET || PEEK == TKN_LPAREN) {
+    while (EAT(TKN_PLUS)) {
         ARRAY_BUILDER_PUSH(factors, Parser_factor());
     }
-    return ASTNode_ctor_nodes(AST_FACTORS, ARRAY_BUILDER_FINALIZE(factors));
+    return ASTNode_ctor_nodes(AST_CONCAT,  ARRAY_BUILDER_FINALIZE(factors));
 }
 
 /*
@@ -98,11 +114,19 @@ ASTNode* parser_term(Parser* parser) {
 **        | "{" expression "}" ;
 */
 ASTNode* parser_factor(Parser* parser) {
-    LOG_INFO("factor");
-    if (EAT(TKN_IDENTIFIER))
-        return ASTNode_ctor_value(AST_IDENTIFIER, LEXER_GET_STRING);
-    else if (EAT(TKN_LITERAL))
-        return ASTNode_ctor_value(AST_LITERAL, LEXER_GET_STRING);
+    LOG_TRACE("factor");
+    if (PEEK == TKN_IDENTIFIER)
+    {
+        char * tmp = LEXER_GET_STRING;
+        POP;
+        return ASTNode_ctor_value(AST_IDENTIFIER, tmp);
+    }
+    else if (PEEK ==TKN_LITERAL)
+    {
+        char * tmp = LEXER_GET_STRING;
+        POP;
+        return ASTNode_ctor_value(AST_LITERAL, tmp);
+    }
     else if (EAT(TKN_LBRACE))
     {
         ASTNode *expr = Parser_expression();
@@ -127,7 +151,21 @@ ASTNode* parser_factor(Parser* parser) {
 
 void parser_err(Parser* parser) {
     parser->status = 1;
-    fprintf(stderr, "Parsing error!\n");
-    exit(EXIT_FAILURE);
+    const char *error_ptr = parser->lexer->input + parser->lexer->pos;
+    const char *line_start = error_ptr;
+    while (line_start > parser->lexer->input && *(line_start - 1) != '\n') {
+        line_start--;
+    }
+
+    const char *line_end = error_ptr;
+    while (*line_end && *line_end != '\n') {
+        line_end++;
+    }
+
+    int col = error_ptr - line_start;
+
+    fprintf(stderr, "42sh: parser: Unexpected token:\n%.*s\n%*s%s\n",
+        (int)(line_end - line_start), line_start, col, "", "^");
+    exit(1);
 }
 

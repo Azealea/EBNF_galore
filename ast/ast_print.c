@@ -8,26 +8,28 @@ static void ast_print(ASTNode* node, int rec_level)
 
     switch (node->type) {
         case AST_IDENTIFIER:
+            printf("%%%s%%", node->data.value);
+            break;
         case AST_LITERAL:
             printf("\"%s\"", node->data.value);
             break;
 
         case AST_GROUP:
-            printf("(");
+            printf("( ");
             ast_print(node->data.child,1);
-            printf(")");
+            printf(" )");
             break;
 
         case AST_OPTIONAL:
-            printf("[");
+            printf("[ ");
             ast_print(node->data.child, 1);
-            printf("]");
+            printf(" ]");
             break;
 
         case AST_REPETITION:
-            printf("{");
+            printf("{ ");
             ast_print(node->data.child, 1);
-            printf("}");
+            printf(" }");
             break;
 
         case AST_FACTORS: {
@@ -46,14 +48,13 @@ static void ast_print(ASTNode* node, int rec_level)
                 ast_print(node->data.nodes[i],rec_level+1);
                 printf("\n");
             }
+                printf("\t;\n");
                 break;
             }
-            printf("(");
             for (int i = 0; node->data.nodes[i] != NULL; i++) {
                 if (i > 0) printf(" | ");
                 ast_print(node->data.nodes[i], 1);
             }
-            printf(")");
             break;
         }
     }

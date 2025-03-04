@@ -9,55 +9,59 @@ exp =
     "nil"
   | integer
   | string
-  | type-id "[" exp "]" "of" exp
-  | type-id "{" [ id "=" exp { "," id "=" exp } ] "}"
+  | type_id + "[" + exp +  "]" "of" exp
+  | type_id "{" [ id "=" exp { "," id "=" exp } ] "}"
   | lvalue
   | id "(" [ exp { "," exp }] ")"
-  | "-" exp
-  | exp op exp
-  | "(" exps ")"
-  | lvalue ":=" exp
-  | "if" exp "then" exp ["else" exp]
-  | "while" exp "do" exp
-  | "for" id ":=" exp "to" exp "do" exp
-  | "break"
-  | "let" chunks "in" exps "end"
+      | "-" exp
+      | exp op exp
+      | "(" exps ")"
+      | lvalue ":=" exp
+      | "if" exp "then" exp ["else" exp]
+      | "while" exp "do" "\n" exp "\n"
+      | "for" id ":=" exp "to" exp "do" "\n" exp "\n"
+      | "break" "\n"
+      | "let" "\n" chunks "in" "\n" exps "end" "\n"
+      ;
+
+    lvalue =
+        id
+      | lvalue  + "." +  id
+      | lvalue + "[" +  exp +  "]"
+      ;
+
+    op = "+" | "-" | "*" | "/" | "=" | "<>" | ">" | "<" | ">=" | "<=" | "&" | "|" ;
+
+
+    chunks = { chunk "\n" };
+    chunk =
+        { tydec }
+      | fundec
+      | vardec
+
+  | "import" string "\n"
   ;
 
-lvalue =
-    id
-  | lvalue "." id
-  | lvalue "[" exp "]"
-  ;
+vardec = "var" id [ ":" type_id ] ":=" exp ;
 
-op = "+" | "-" | "*" | "/" | "=" | "<>" | ">" | "<" | ">=" | "<=" | "&" | "|" ;
-
-
-chunks = { chunk } ;
-chunk =
-    { tydec }   (* tychunk *)
-  | { fundec }  (* funchunk *)
-  | vardec      (* varchunk *)
-
-  | "import" string
-  ;
-
-vardec = "var" id [ ":" type-id ] ":=" exp ;
-
-tydec = "type" id "=" ty ;
+tydec = "type" id "=" ty  ;
 
 fundec =
-    "function" id "(" tyfields ")" [ ":" type-id ] "=" exp
-  | "primitive" id "(" tyfields ")" [ ":" type-id ]
+    "function" id "(" tyfields ")" [ ":" type_id ] "=" exp
+  | "primitive" id "(" tyfields ")" [ ":" type_id ]
   ;
 
 
 ty =
-     type-id
+     type_id
    | "{" tyfields  "}"
-   | "array" "of" type-id
+   | "array" "of" type_id
    ;
 
-tyfields = [ id ":" type-id { "," id ":" type-id } ] ;
-type-id = id ;
+tyfields = [ id ":" type_id { "," id ":" type_id } ] ;
+type_id = id ;
+
+integer = "1" | "0" | "4" | "69" | "-1" ;
+string = '"hello hihihihi"';
+id= "foo" | "bar" | "count" | "ur_mama" ;
 
