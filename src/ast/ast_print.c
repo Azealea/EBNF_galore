@@ -22,12 +22,14 @@ static void ast_print(ASTNode* node, int rec_level)
             break;
 
         case AST_OPTIONAL:
+            printf("yes-no : %d-%d >", node->data.optional.yes_weight,node->data.optional.no_weight);
             printf("[ ");
             ast_print(node->data.child, 1);
             printf(" ]");
             break;
 
         case AST_REPETITION:
+            printf("max repetition : %d >", node->data.repetition.max_rep);
             printf("{ ");
             ast_print(node->data.child, 1);
             printf(" }");
@@ -71,7 +73,7 @@ static void ast_print(ASTNode* node, int rec_level)
 static void grammar_rule_print(GrammarRule *rule)
 {
     if (rule->is_root)
-        printf("#");
+        printf("!");
     printf("%s =\n", rule->identifier);
     ast_print(rule->node, 0);
 }

@@ -21,6 +21,9 @@ The rules that will taken as root must be preceded by a explamation mark :
 
  "!foo = "bar" ;"
 
+## Random control
+
+### Choices
 
 To help random not exploding when confronted with choices, an number can be inserted before a choice to specify the weight,
 if not specified it will be defaulted to 1 :
@@ -29,9 +32,19 @@ if not specified it will be defaulted to 1 :
 
  ( 2 third chance of taking expr_A, 1 third chance of taking expr_B)
 
+### Repetition
+
+To specify the maximum number of repetition :
+
+" { 5 expr } "    => 5 repetition maximum
+
+### Optional
+
+To specify the chance of taking a optional expression :
+
+" [ 3 1 expr ] "   =>  3 chance in 4 of taking the expr, or else discard it
 
 ### TODO
 - Comments as (* this is a comment \*\)
-- Limit number of repetition
 
 

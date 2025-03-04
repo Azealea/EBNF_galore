@@ -1,8 +1,8 @@
 !variable = "let" "var" "fooo" "=" "1" "in" ;
 !expif  = expif_int | expif_string ;
 
-expif_int = "if" exp_int "then" "\n" exp_int ["else" "\n" exp_int] ;
-expif_string = "if" exp_int "then" "\n" exp_string ["else" "\n" exp_string] ;
+expif_int = "if" exp_int "then" "\n" exp_int  [ "else" "\n" exp_int] ;
+expif_string = "if" exp_int "then" "\n" exp_string [  "else" "\n" exp_string] ;
 
 exp_int = 1 expif_int
     | 3 integer

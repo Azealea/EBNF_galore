@@ -24,6 +24,15 @@ typedef struct ASTNode {
             struct ASTNode **choices;
             int weigth;
         } factors;
+        struct {
+            struct ASTNode *child;
+            int max_rep;
+        } repetition;
+        struct {
+            struct ASTNode *child;
+            int yes_weight;
+            int no_weight;
+        } optional;
         struct ASTNode **nodes;
         struct ASTNode *child;
         char* value;
@@ -43,7 +52,9 @@ typedef struct
 } Grammar;
 
 void free_ast(ASTNode* node);
-ASTNode* ASTNode_ctor_factors(ASTNodeType type, ASTNode** nodes, int weigth);
+ASTNode* ASTNode_ctor_factors(ASTNode** nodes, int weigth);
+ASTNode* ASTNode_ctor_repition(ASTNode* child, int mar_rep);
+ASTNode* ASTNode_ctor_optional(ASTNode* child, int no_weight, int yes_weight);
 ASTNode* ASTNode_ctor_value(ASTNodeType type, char *value);
 ASTNode* ASTNode_ctor_nodes(ASTNodeType type, ASTNode **nodes);
 ASTNode* ASTNode_ctor_node(ASTNodeType type, ASTNode *nodes);

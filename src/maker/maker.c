@@ -35,7 +35,8 @@ void gen_group(Grammar *grammar, ASTNode *node) {
 void gen_optional(Grammar *grammar, ASTNode *node) {
     if (!node->data.child)
         return;
-    if (rand() % 2 == 0) {
+    int weigths = node->data.optional.no_weight + node->data.optional.yes_weight;
+    if (rand() % weigths >= node->data.optional.yes_weight) {
         generate_script(grammar, node->data.child);
     }
 }
@@ -43,7 +44,7 @@ void gen_optional(Grammar *grammar, ASTNode *node) {
 void gen_repetition(Grammar *grammar, ASTNode *node) {
     if (!node->data.child)
         return;
-    int count = rand() % 3;
+    int count = rand() % node->data.repetition.max_rep;
     for (int i = 0; i < count; i++) {
         generate_script(grammar, node->data.child);
     }

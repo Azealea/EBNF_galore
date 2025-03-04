@@ -9,11 +9,27 @@ static inline ASTNode* ASTNode_ctor(ASTNodeType type)
     return node;
 }
 
-ASTNode* ASTNode_ctor_factors(ASTNodeType type, ASTNode** nodes, int weigth)
+ASTNode* ASTNode_ctor_factors(ASTNode** nodes, int weigth)
 {
-    ASTNode *node = ASTNode_ctor(type);
+    ASTNode *node = ASTNode_ctor(AST_FACTORS);
     node->data.factors.choices = nodes;
     node->data.factors.weigth = weigth;
+    return node;
+}
+
+ASTNode* ASTNode_ctor_repition(ASTNode* child, int max_rep)
+{
+    ASTNode *node = ASTNode_ctor(AST_REPETITION);
+    node->data.repetition.child = child;
+    node->data.repetition.max_rep = max_rep;
+    return node;
+}
+ASTNode* ASTNode_ctor_optional(ASTNode* child, int yes_weight, int no_weight)
+{
+    ASTNode *node = ASTNode_ctor(AST_OPTIONAL);
+    node->data.optional.child = child;
+    node->data.optional.no_weight = no_weight;
+    node->data.optional.yes_weight = yes_weight;
     return node;
 }
 

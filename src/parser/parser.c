@@ -10,6 +10,20 @@
 #define POP lexer_pop(parser->lexer)
 #define EAT(tkn) parser_eat(parser, tkn)
 #define LEXER_GET_STRING strdup(parser->lexer->lexeme)
+#define LEXER_GET_NUMBER parser_take_number(parser)
+
+int parser_take_number(Parser *parser)
+{
+    if (PEEK == TKN_WEIGHT)
+    {
+        int res = atoi(parser->lexer->lexeme);
+        POP;
+        return res;
+    }
+    else {
+        return 1;
+    }
+}
 
 bool parser_eat(Parser *parser, Token tkn)
 {
@@ -84,18 +98,13 @@ ASTNode* parser_expression(Parser* parser) {
 ASTNode* parser_term(Parser* parser) {
     // term is a group of factor
     LOG_TRACE("term");
-    int weight = 1;
-    if (PEEK == TKN_WEIGHT)
-    {
-        weight = atoi(parser->lexer->lexeme);
-        POP;
-    }
+    int weight = LEXER_GET_NUMBER;
     ARRAY_BUILDER(concats, ASTNode*);
     ARRAY_BUILDER_PUSH(concats, Parser_concat());
     while (PEEK == TKN_IDENTIFIER || PEEK == TKN_LITERAL || PEEK == TKN_LBRACE || PEEK == TKN_LBRACKET || PEEK == TKN_LPAREN) {
         ARRAY_BUILDER_PUSH(concats, Parser_concat());
     }
-    return ASTNode_ctor_factors(AST_FACTORS, ARRAY_BUILDER_FINALIZE(concats), weight);
+    return ASTNode_ctor_factors(ARRAY_BUILDER_FINALIZE(concats), weight);
 }
 
 /*
@@ -116,8 +125,8 @@ ASTNode* parser_concat(Parser* parser)
 ** factor = identifier
 **        | literal
 **        | "(" expression ")"
-**        | "[" expression "]"
-**        | "{" expression "}" ;
+**        | "["  [ ? [0-9]+<space>[0-9]+ ? ] expression "]"
+**        | "{" ? [0-9]* ? expression "}" ;
 */
 ASTNode* parser_factor(Parser* parser) {
     LOG_TRACE("factor");
@@ -135,15 +144,23 @@ ASTNode* parser_factor(Parser* parser) {
     }
     else if (EAT(TKN_LBRACE))
     {
+        int max_rep = PEEK == TKN_WEIGHT ? LEXER_GET_NUMBER : 3 ;
         ASTNode *expr = Parser_expression();
         if (!EAT(TKN_RBRACE)) PARSER_ERR;
-        return ASTNode_ctor_node(AST_REPETITION, expr);
+        return ASTNode_ctor_repition(expr, max_rep);
     }
     else if (EAT(TKN_LBRACKET))
     {
+        int w_yes = 1;
+        int w_no = 1;
+        if (PEEK == TKN_WEIGHT)
+        {
+            w_yes = LEXER_GET_NUMBER;
+            w_no = LEXER_GET_NUMBER;
+        }
         ASTNode *expr = Parser_expression();
         if (!EAT(TKN_RBRACKET)) PARSER_ERR;
-        return ASTNode_ctor_node(AST_OPTIONAL, expr);
+        return ASTNode_ctor_optional( expr, w_yes, w_no);
     }
     else if (EAT(TKN_LPAREN))
     {
@@ -170,8 +187,8 @@ void parser_err(Parser* parser) {
 
     int col = error_ptr - line_start;
 
-    fprintf(stderr, "42sh: parser: Unexpected token:\n%.*s\n%*s%s\n",
-        (int)(line_end - line_start), line_start, col, "", "^");
+    fprintf(stderr, "parser: Unexpected token:\n%.*s\n%*s%s\n",
+            (int)(line_end - line_start), line_start, col + 1, "", "^");
     exit(1);
 }
 
