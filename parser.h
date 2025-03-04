@@ -5,22 +5,16 @@
 #include "ast.h"
 #include "lexer.h"
 
-enum parser_verbose {
-    VERBOSITY_NONE,
-    VERBOSITY_INFO,
-    VERBOSITY_ALL,
-};
 
 typedef struct {
     Lexer* lexer;
     int status;
-    enum parser_verbose vebose;
 } Parser;
 
-ASTNode* parse(const char* path);
+Grammar* parse(const char* path);
 
-ASTNode* parser_syntax(Parser* p);
-ASTNode* parser_rule(Parser* p);
+Grammar* parser_syntax(Parser* p);
+GrammarRule* parser_rule(Parser* p);
 ASTNode* parser_expression(Parser* p);
 ASTNode* parser_term(Parser* p);
 ASTNode* parser_factor(Parser* p);
@@ -46,11 +40,14 @@ void parser_err(Parser* p);
 **        | literal
 **        | "(" expression ")"
 **        | "[" expression "]"
-**        | "{" repetition "}" ;
+**        | "{" expression "}" ;
+**
+** (* lexer job VVV *)
 **
 ** identifier = letter { letter | digit | "_" } ;
 **
-** literal = '"' character { character } '"' | "'" character { character } "'" ;
+** literal = '"' character { character } '"'
+**         | "'" character { character } "'" ;
 **
 ** character = ? [^'"] ? ;
 **

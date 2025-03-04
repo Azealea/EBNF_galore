@@ -1,0 +1,88 @@
+program =
+    exp
+  | chunks
+  ;
+
+
+(* === Expressions. === *)
+exps = [ exp { ";" exp } ] ;
+exp =
+  (* Literals. *)
+    "nil"
+  | integer
+  | string
+
+  (* Array and record creations. *)
+  | type-id "[" exp "]" "of" exp
+  | type-id "{" [ id "=" exp { "," id "=" exp } ] "}"
+
+  (* Variables, field, elements of an array. *)
+  | lvalue
+
+  (* Function call. *)
+  | id "(" [ exp { "," exp }] ")"
+
+  (* Operations. *)
+  | "-" exp
+  | exp op exp
+  | "(" exps ")"
+
+  (* Assignment. *)
+  | lvalue ":=" exp
+
+  (* Control structures. *)
+  | "if" exp "then" exp ["else" exp]
+  | "while" exp "do" exp
+  | "for" id ":=" exp "to" exp "do" exp
+  | "break"
+  | "let" chunks "in" exps "end"
+  ;
+
+lvalue =
+    id
+  (* Record field access. *)
+  | lvalue "." id
+  (* Array subscript. *)
+  | lvalue "[" exp "]"
+  ;
+
+op = "+" | "-" | "*" | "/" | "=" | "<>" | ">" | "<" | ">=" | "<=" | "&" | "|" ;
+
+
+(* === Chunks of declarations. === *)
+chunks = { chunk } ;
+chunk =
+    { tydec }   (* tychunk *)
+  | { fundec }  (* funchunk *)
+  | vardec      (* varchunk *)
+
+  (* Importing a set of declarations. *)
+  | "import" string
+  ;
+
+(* Variable declaration. *)
+vardec = "var" id [ ":" type-id ] ":=" exp ;
+
+(* Type declaration. *)
+tydec = "type" id "=" ty ;
+
+(* Function declaration. *)
+fundec =
+    "function" id "(" tyfields ")" [ ":" type-id ] "=" exp
+  | "primitive" id "(" tyfields ")" [ ":" type-id ]
+  ;
+
+
+(* === Types. === *)
+ty =
+   (* Type alias. *)
+     type-id
+   (* Record type definition. *)
+   | "{" tyfields  "}"
+   (* Array type definition. *)
+   | "array" "of" type-id
+   ;
+
+tyfields = [ id ":" type-id { "," id ":" type-id } ] ;
+type-id = id ;
+

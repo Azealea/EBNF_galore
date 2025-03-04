@@ -5,25 +5,40 @@
 #include <string.h>
 
 typedef enum {
-    AST_IDENTIFIER,
-    AST_LITERAL,
-    AST_EXPRESSION,
-    AST_TERM,
-    AST_FACTOR,
+    AST_CHOICE,
+    AST_FACTORS,
     AST_GROUP,
-    AST_OPTION,
+    AST_OPTIONAL,
     AST_REPETITION,
-    AST_RULE
+    AST_LITERAL,
+    AST_IDENTIFIER
 } ASTNodeType;
 
-// AST Node Structure
 typedef struct ASTNode {
     ASTNodeType type;
-    const char* value;
-    struct ASTNode* left;
-    struct ASTNode* right;
+    union
+    {
+        struct ASTNode **nodes;
+        struct ASTNode *child;
+        char* value;
+    } data;
 } ASTNode;
 
-ASTNode* create_ast_node(ASTNodeType type, const char* value, ASTNode* left,
-                         ASTNode* right);
+typedef struct
+{
+    char *identifier;
+    ASTNode *node;
+} GrammarRule;
+
+typedef struct
+{
+    GrammarRule **rules;
+} Grammar;
+
 void free_ast(ASTNode* node);
+ASTNode* ASTNode_ctor_value(ASTNodeType type, char *value);
+ASTNode* ASTNode_ctor_nodes(ASTNodeType type, ASTNode **nodes);
+ASTNode* ASTNode_ctor_node(ASTNodeType type, ASTNode *nodes);
+GrammarRule *GrammarRule_ctor(char *identifier, ASTNode* node);
+Grammar * Grammar_ctor(GrammarRule **rules);
+void grammar_print(Grammar *grammar);

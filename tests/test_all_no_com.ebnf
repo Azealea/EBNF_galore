@@ -1,0 +1,63 @@
+program =
+    exp
+  | chunks
+  ;
+
+
+exps = [ exp { ";" exp } ] ;
+exp =
+    "nil"
+  | integer
+  | string
+  | type-id "[" exp "]" "of" exp
+  | type-id "{" [ id "=" exp { "," id "=" exp } ] "}"
+  | lvalue
+  | id "(" [ exp { "," exp }] ")"
+  | "-" exp
+  | exp op exp
+  | "(" exps ")"
+  | lvalue ":=" exp
+  | "if" exp "then" exp ["else" exp]
+  | "while" exp "do" exp
+  | "for" id ":=" exp "to" exp "do" exp
+  | "break"
+  | "let" chunks "in" exps "end"
+  ;
+
+lvalue =
+    id
+  | lvalue "." id
+  | lvalue "[" exp "]"
+  ;
+
+op = "+" | "-" | "*" | "/" | "=" | "<>" | ">" | "<" | ">=" | "<=" | "&" | "|" ;
+
+
+chunks = { chunk } ;
+chunk =
+    { tydec }   (* tychunk *)
+  | { fundec }  (* funchunk *)
+  | vardec      (* varchunk *)
+
+  | "import" string
+  ;
+
+vardec = "var" id [ ":" type-id ] ":=" exp ;
+
+tydec = "type" id "=" ty ;
+
+fundec =
+    "function" id "(" tyfields ")" [ ":" type-id ] "=" exp
+  | "primitive" id "(" tyfields ")" [ ":" type-id ]
+  ;
+
+
+ty =
+     type-id
+   | "{" tyfields  "}"
+   | "array" "of" type-id
+   ;
+
+tyfields = [ id ":" type-id { "," id ":" type-id } ] ;
+type-id = id ;
+

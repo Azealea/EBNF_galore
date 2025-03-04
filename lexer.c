@@ -1,31 +1,51 @@
 #include "lexer.h"
 
 static void lexer_read_file(Lexer* lexer) {
+    LOG_TRACE("read_file");
     fread(lexer->input, sizeof(*lexer->input), SIZE_INPUT_BUFF, lexer->file);
 }
 
-void lexer_init(Lexer* lexer, const char* path) {
-    lexer->file = fopen(path, "r");
-    lexer_read_file(lexer);
-    lexer->pos = 0;
-    lexer->current_token = lexer_next_token(lexer);
-}
-
-Token lexer_peek(Lexer* lexer) { return lexer->current_token; }
-
-Token lexer_pop(Lexer* lexer) {
-    Token token = lexer->current_token;
-    lexer->current_token = lexer_next_token(lexer);
-    return token;
-}
-
-void lexer_advance(Lexer* lexer) {
+static void lexer_advance(Lexer* lexer) {
+    LOG_TRACE("advance");
     if (lexer->input[lexer->pos] != '\0') {
         lexer->pos++;
     }
 }
 
-Token lexer_next_token(Lexer* lexer) {
+static void lexer_skip_whitespace(Lexer* lexer) {
+    LOG_TRACE("whitespace");
+    while (isspace(lexer->input[lexer->pos])) {
+        lexer_advance(lexer);
+    }
+}
+
+static Token lexer_identifier(Lexer* lexer) {
+    LOG_TRACE("identifier");
+    size_t start = lexer->pos;
+    while (isalnum(lexer->input[lexer->pos])) {
+        lexer_advance(lexer);
+    }
+    strncpy(lexer->lexeme, lexer->input + start, lexer->pos - start);
+    lexer->lexeme[lexer->pos - start] = '\0';
+    return TKN_IDENTIFIER;
+}
+
+static Token lexer_literal(Lexer* lexer) {
+    LOG_TRACE("literal");
+    char quote = lexer->input[lexer->pos++];
+    size_t start = lexer->pos;
+    while (lexer->input[lexer->pos] != quote &&
+           lexer->input[lexer->pos] != '\0') {
+        lexer_advance(lexer);
+    }
+    strncpy(lexer->lexeme, lexer->input + start, lexer->pos - start);
+    lexer->lexeme[lexer->pos - start] = '\0';
+    lexer_advance(lexer);
+    return TKN_LITERAL;
+}
+
+static Token lexer_next_token(Lexer* lexer) {
+    LOG_TRACE("next_token");
     lexer_skip_whitespace(lexer);
     char c = lexer->input[lexer->pos];
 
@@ -66,31 +86,24 @@ Token lexer_next_token(Lexer* lexer) {
     }
 }
 
-void lexer_skip_whitespace(Lexer* lexer) {
-    while (isspace(lexer->input[lexer->pos])) {
-        lexer_advance(lexer);
-    }
+
+void lexer_init(Lexer* lexer, const char* path) {
+    LOG_TRACE("init");
+    lexer->file = fopen(path, "r");
+    lexer_read_file(lexer);
+    lexer->pos = 0;
+    lexer->current_token = lexer_next_token(lexer);
 }
 
-Token lexer_identifier(Lexer* lexer) {
-    size_t start = lexer->pos;
-    while (isalnum(lexer->input[lexer->pos])) {
-        lexer_advance(lexer);
-    }
-    strncpy(lexer->lexeme, lexer->input + start, lexer->pos - start);
-    lexer->lexeme[lexer->pos - start] = '\0';
-    return TKN_IDENTIFIER;
+Token lexer_peek(Lexer* lexer) {
+    LOG_TRACE("peek");
+    return lexer->current_token;
 }
 
-Token lexer_literal(Lexer* lexer) {
-    char quote = lexer->input[lexer->pos++];
-    size_t start = lexer->pos;
-    while (lexer->input[lexer->pos] != quote &&
-           lexer->input[lexer->pos] != '\0') {
-        lexer_advance(lexer);
-    }
-    strncpy(lexer->lexeme, lexer->input + start, lexer->pos - start);
-    lexer->lexeme[lexer->pos - start] = '\0';
-    lexer_advance(lexer);
-    return TKN_LITERAL;
+Token lexer_pop(Lexer* lexer) {
+    LOG_TRACE("pop");
+    Token token = lexer->current_token;
+    lexer->current_token = lexer_next_token(lexer);
+    return token;
 }
+

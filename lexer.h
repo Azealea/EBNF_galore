@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "log.h"
 
 #define SIZE_INPUT_BUFF 100000
 
@@ -33,10 +34,4 @@ typedef struct {
 
 Token lexer_peek(Lexer* lexer);
 Token lexer_pop(Lexer* lexer);
-
 void lexer_init(Lexer* lexer, const char* path);
-void lexer_advance(Lexer* lexer);
-Token lexer_next_token(Lexer* lexer);
-void lexer_skip_whitespace(Lexer* lexer);
-Token lexer_identifier(Lexer* lexer);
-Token lexer_literal(Lexer* lexer);
