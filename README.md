@@ -1,14 +1,13 @@
 # EBNF_Galore
 ### Maker of random script with EBNF based structure
 
-I have added some specific things to help writing the base structure, but it
-does those EBNF operation :
+I have added some specific syntax to help writing the base structure, but it
+does follow these EBNF operation :
 
  [ expr ]           => expr will appear 0 or 1 time
- { expr }           => expr will appear 0 or inf time
+ { expr }           => expr will appear 0 to inf time
  ( expr )           => grouping
  expr_A | expr_B    => it will chose between expr_A and expr_B at random
-
 
 The rules are declared as per usual :
 
